@@ -84,6 +84,9 @@ Model modelDartLegoRightLeg;
 // Mayow
 Model mayowModelAnimate;
 
+//Personaje
+Model personajeModelAnimate;
+
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint skyboxTextureID;
 
@@ -95,12 +98,13 @@ GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
 
-std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
-		"../Textures/mp_bloodvalley/blood-valley_bk.tga",
-		"../Textures/mp_bloodvalley/blood-valley_up.tga",
-		"../Textures/mp_bloodvalley/blood-valley_dn.tga",
-		"../Textures/mp_bloodvalley/blood-valley_rt.tga",
-		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };
+std::string fileNames[6] = { 
+		"../Textures/ame_nebula/purplenebula_ft.tga",
+		"../Textures/ame_nebula/purplenebula_bk.tga",
+		"../Textures/ame_nebula/purplenebula_up.tga",
+		"../Textures/ame_nebula/purplenebula_dn.tga",
+		"../Textures/ame_nebula/purplenebula_rt.tga",
+		"../Textures/ame_nebula/purplenebula_lf.tga" };
 
 bool exitApp = false;
 int lastMousePosX, offsetX = 0;
@@ -114,6 +118,7 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixPersonaje = glm::mat4(1.0f);
 
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 0;
@@ -291,6 +296,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+
+	//Personaje
+	personajeModelAnimate.loadModel("../models/GameCharacter_blend/Character_22_2.fbx");
+	personajeModelAnimate.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 
@@ -692,6 +701,23 @@ bool processInput(bool continueApplication) {
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
+	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		modelMatrixPersonaje = glm::translate(modelMatrixPersonaje, glm::vec3(0.0, 0.0, 0.01));
+		personajeModelAnimate.setAnimationIndex(1);
+	}
+	else if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		modelMatrixPersonaje = glm::translate(modelMatrixPersonaje, glm::vec3(0.0, 0.0, -0.01));
+		personajeModelAnimate.setAnimationIndex(1);
+	}
+	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		modelMatrixPersonaje = glm::rotate(modelMatrixPersonaje, 0.01f,glm::vec3(0.0, 1.0, 0.0));
+		personajeModelAnimate.setAnimationIndex(1);
+	}
+	else if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		modelMatrixPersonaje = glm::rotate(modelMatrixPersonaje, -0.01f, glm::vec3(0.0, 1.0, 0.0));
+		personajeModelAnimate.setAnimationIndex(1);
+	}
+
 	glfwPollEvents();
 	return continueApplication;
 }
@@ -998,6 +1024,12 @@ void applicationLoop() {
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
 		mayowModelAnimate.setAnimationIndex(0);
 		mayowModelAnimate.render(modelMatrixMayowBody);
+
+		glm::mat4 modelMatrixPersonajeBody = glm::mat4(modelMatrixPersonaje);
+		modelMatrixPersonajeBody = glm::scale(modelMatrixPersonajeBody, glm::vec3(0.01, 0.01, 0.01));
+		personajeModelAnimate.render(modelMatrixPersonajeBody);
+		personajeModelAnimate.setAnimationIndex(0);
+
 
 		/*******************************************
 		 * Skybox
