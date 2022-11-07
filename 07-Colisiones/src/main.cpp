@@ -170,6 +170,12 @@ std::vector<float> lamp2Orientation = {21.37 + 90, -65.0 + 90};
 double deltaTime;
 double currTime, lastTime;
 
+//Varaibles para salto May
+bool isJump = false;
+float GRAVITY = 0.5;
+double tmv = 0.0;
+double startTimeJump = 0.0;
+
 // Colliders
 std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > collidersOBB;
 std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> > collidersSBB;
@@ -792,6 +798,26 @@ bool processInput(bool continueApplication) {
 		return false;
 	}
 
+	if (glfwJoystickPresent( GLFW_JOYSTICK_1 ) == GLFW_TRUE) { // Arroja un verdadero o falso si está conectado el joystick
+		std::cout << "Esta conectado el joistick 0" << std::endl;
+
+		//Poner un brake point y presionar botones para identificar que eje es cual
+		int numberAxes, numeroBotones;
+		const float* axes = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &numberAxes );
+		std::cout << "Numero de ejes:= " << numberAxes << std::endl;
+		std::cout << "Axes[0] ->" << axes[0] << std::endl;
+		std::cout << "Axes[1] ->" << axes[1] << std::endl;
+		std::cout << "Axes[2] ->" << axes[2] << std::endl;
+		std::cout << "Axes[3] ->" << axes[3] << std::endl;
+		std::cout << "Axes[4] ->" << axes[5] << std::endl;
+		std::cout << "Axes[5] ->" << axes[6] << std::endl;
+
+		const unsigned char* botones = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &numeroBotones);
+		std::cout << "NUmero de botones:_" << numeroBotones << std::endl;
+		if (botones[0] == GLFW_PRESS)//Averiguar que botón esta en 0
+			std::cout << "Se presiona el boton X :=" << std::endl;
+	}
+
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		camera->mouseMoveCamera(offsetX, 0.0, deltaTime);
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
@@ -903,6 +929,13 @@ bool processInput(bool continueApplication) {
 		animationIndex = 0;
 	}
 
+	bool keySpaceStatus = glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS;
+	if (!isJump && keySpaceStatus) {
+		isJump = true;
+		tmv = 0.0;
+		startTimeJump = currTime;
+	}
+
 	glfwPollEvents();
 	return continueApplication;
 }
@@ -937,7 +970,7 @@ void applicationLoop() {
 
 	while (psi) {
 		currTime = TimeManager::Instance().GetTime();
-		if(currTime - lastTime < 0.016666667){
+		if(currTime - lastTime < 0.016666667){ //Aca se puede modificar a 2 para hacer mas lento el depurado y averiguar eje joystick
 			glfwPollEvents();
 			continue;
 		}
@@ -1244,7 +1277,15 @@ void applicationLoop() {
 		/*******************************************
 		 * Custom Anim objects obj
 		 *******************************************/
-		modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+		//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+		modelMatrixMayow[3][1] = -tmv * tmv * GRAVITY + 3.0 * tmv +
+			terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+		tmv = currTime - startTimeJump;
+		if (modelMatrixMayow[3][1] < terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2])) { //Si ya cayó por debajo del terreno
+			isJump = false;
+			modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+		}
+
 		glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
 		mayowModelAnimate.setAnimationIndex(animationIndex);
