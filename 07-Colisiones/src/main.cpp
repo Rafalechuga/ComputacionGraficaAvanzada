@@ -172,7 +172,7 @@ double currTime, lastTime;
 
 //Varaibles para salto May
 bool isJump = false;
-float GRAVITY = 0.5;
+float GRAVITY = 2.8;
 double tmv = 0.0;
 double startTimeJump = 0.0;
 
@@ -805,17 +805,68 @@ bool processInput(bool continueApplication) {
 		int numberAxes, numeroBotones;
 		const float* axes = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &numberAxes );
 		std::cout << "Numero de ejes:= " << numberAxes << std::endl;
-		std::cout << "Axes[0] ->" << axes[0] << std::endl;
-		std::cout << "Axes[1] ->" << axes[1] << std::endl;
-		std::cout << "Axes[2] ->" << axes[2] << std::endl;
-		std::cout << "Axes[3] ->" << axes[3] << std::endl;
-		std::cout << "Axes[4] ->" << axes[5] << std::endl;
-		std::cout << "Axes[5] ->" << axes[6] << std::endl;
+		std::cout << "Axes[0] ->" << axes[0] << std::endl; //LS X
+		std::cout << "Axes[1] ->" << axes[1] << std::endl; //LS Y
+		std::cout << "Axes[2] ->" << axes[2] << std::endl; //RS X
+		std::cout << "Axes[3] ->" << axes[3] << std::endl; //RS Y
+		std::cout << "Axes[4] ->" << axes[4] << std::endl; //LT
+		std::cout << "Axes[5] ->" << axes[5] << std::endl; //RT
+
+		if (fabs(axes[3] > 0.2f)) {
+			modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0f, 0.0f, axes[3] *0.2f));
+			animationIndex = 0;
+		}
+		if (fabs(axes[2]) > 0.2f) { //Se multiplica por 0.5 para ajustar el valor
+			modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-axes[2] *0.5f), glm::vec3(0.0f, 1.0f, 0.0f));;
+			animationIndex = 0;
+		}
+
+		if (fabs(axes[2] > 0.2f)) {
+			camera->mouseMoveCamera(axes[2] * 0.5f, 0, deltaTime);
+		}
+
+		if (fabs(axes[3] > 0.2f)) {
+			camera->mouseMoveCamera(0, axes[3] * 0.5f, deltaTime);
+		}
+
 
 		const unsigned char* botones = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &numeroBotones);
-		std::cout << "NUmero de botones:_" << numeroBotones << std::endl;
-		if (botones[0] == GLFW_PRESS)//Averiguar que botón esta en 0
-			std::cout << "Se presiona el boton X :=" << std::endl;
+		std::cout << "Numero de botones: " << numeroBotones << std::endl;
+		if (botones[0] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 0 :=" << std::endl; //A
+		if (botones[1] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 1 :=" << std::endl; //B
+		if (botones[2] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 2 :=" << std::endl; //X
+		if (botones[3] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 3 :=" << std::endl; //Y
+		if (botones[4] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 4 :=" << std::endl; //LB
+		if (botones[5] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 5 :=" << std::endl; //RB
+		if (botones[6] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 6 :=" << std::endl; //Options
+		if (botones[7] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 7 :=" << std::endl; //Menu
+		if (botones[8] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 8 :=" << std::endl; //L
+		if (botones[9] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 9 :=" << std::endl; //R
+		if (botones[10] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 10 :=" << std::endl; //arriba
+		if (botones[11] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 11 :=" << std::endl; //->
+		if (botones[12] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 12 :=" << std::endl; //abajo
+		if (botones[13] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 13 :=" << std::endl; //<-
+
+
+		if (!isJump && botones[0] == GLFW_PRESS) {
+			isJump = true;
+			startTimeJump = currTime;
+			tmv = 0;
+		}
 	}
 
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
