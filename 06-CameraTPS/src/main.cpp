@@ -902,13 +902,13 @@ bool processInput(bool continueApplication) {
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.02));
 	}
-
+	//Personaje Nuevo
 	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		modelMatrixPersonaje = glm::translate(modelMatrixPersonaje, glm::vec3(0.0, 0.0, 0.01));
+		modelMatrixPersonaje = glm::translate(modelMatrixPersonaje, glm::vec3(0.0, 0.0, 0.05));
 		personajeModelAnimate.setAnimationIndex(0);
 	}
 	else if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		modelMatrixPersonaje = glm::translate(modelMatrixPersonaje, glm::vec3(0.0, 0.0, -0.01));
+		modelMatrixPersonaje = glm::translate(modelMatrixPersonaje, glm::vec3(0.0, 0.0, -0.05));
 		personajeModelAnimate.setAnimationIndex(0);
 	}
 	if (modelSelected == 0 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
@@ -919,6 +919,7 @@ bool processInput(bool continueApplication) {
 		modelMatrixPersonaje = glm::rotate(modelMatrixPersonaje, -0.01f, glm::vec3(0.0, 1.0, 0.0));
 		personajeModelAnimate.setAnimationIndex(0);
 	}
+	
 
 	glfwPollEvents();
 	return continueApplication;
@@ -976,10 +977,15 @@ void applicationLoop() {
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixDart));
 			target = glm::vec3(modelMatrixDart[3]);
 		}
-		else {
+		else if (modelSelected == 2) {
 			axisTarget = glm::axis(glm::quat_cast(modelMatrixMayow));
 			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
 			target = glm::vec3(modelMatrixMayow[3]);
+		}
+		else {
+			axisTarget = glm::axis(glm::quat_cast(modelMatrixPersonaje));
+			angleTarget = glm::angle(glm::quat_cast(modelMatrixPersonaje));
+			target = glm::vec3(modelMatrixPersonaje[3]);
 		}
 
 		if (std::isnan(angleTarget)) { //Verificar que no sea un angulo indeterminado
@@ -1258,7 +1264,8 @@ void applicationLoop() {
 		mayowModelAnimate.render(modelMatrixMayowBody);
 
 		glm::mat4 modelMatrixPersonajeBody = glm::mat4(modelMatrixPersonaje);
-		modelMatrixPersonajeBody = glm::scale(modelMatrixPersonajeBody, glm::vec3(0.01, 0.01, 0.01));
+		modelMatrixPersonajeBody = glm::translate(modelMatrixPersonajeBody, glm::vec3(0.0f, 0.6f, 0.0f));
+		modelMatrixPersonajeBody = glm::scale(modelMatrixPersonajeBody, glm::vec3(0.005, 0.005, 0.005));
 		personajeModelAnimate.render(modelMatrixPersonajeBody);
 		personajeModelAnimate.setAnimationIndex(1);
 
