@@ -56,6 +56,9 @@ Shader shaderTerrain;
 
 std::shared_ptr<Camera> camera(new ThirdPersonCamera()); //En esta linea se crea la camara se cambia a camara en tercera persona
 float distanceFromPlayer = 7.0;
+std::shared_ptr<FirstPersonCamera> cameraFP(new FirstPersonCamera());
+
+bool firstPerson = true;
 
 Sphere skyboxSphere(20, 20);
 
@@ -311,6 +314,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	personajeModelAnimate.loadModel("../models/cyborg/animationCyborg_Comp.fbx");
 	personajeModelAnimate.setShader(&shaderMulLighting);
 
+	//Camaras
+	cameraFP->setPosition(glm::vec3(0.0, 0.0, 10.0));
 
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0)); //No tiene sentido cambiar o configurar una posición
 	camera->setDistanceFromTarget(distanceFromPlayer);
@@ -792,13 +797,24 @@ bool processInput(bool continueApplication) {
 		return false;
 	}
 
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS &&
+		glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+		firstPerson = !firstPerson;
+
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
 		camera->mouseMoveCamera(offsetX, 0, deltaTime);
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT))
 		camera->mouseMoveCamera(0, offsetY, deltaTime);
 
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		cameraFP->mouseMoveCamera(offsetX, offsetY, deltaTime);
+
 	offsetX = 0;
 	offsetY = 0;
+
+	glm::mat4 cameraFPPosition = modelMatrixPersonaje;
+	cameraFPPosition = glm::translate(cameraFPPosition, glm::vec3(0.0f, 2.4f, 0.12f));
+	cameraFP->setPosition(cameraFPPosition[3]);
 
 	// Seleccionar modelo
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
@@ -996,10 +1012,15 @@ void applicationLoop() {
 			angleTarget = -angleTarget;
 		}
 
+		
 		camera->setCameraTarget(target);
 		camera->setAngleTarget(angleTarget);
 		camera->updateCamera();
-		view = camera->getViewMatrix();
+
+		if (firstPerson)
+			view = cameraFP->getViewMatrix();
+		else
+			view = camera->getViewMatrix();
 
 		// Settea la matriz de vista y projection al shader con solo color
 		shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
@@ -1263,6 +1284,7 @@ void applicationLoop() {
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
 		mayowModelAnimate.render(modelMatrixMayowBody);
 
+		modelMatrixPersonaje[3][1] = terrain.getHeightTerrain(modelMatrixPersonaje[3][0], modelMatrixPersonaje[3][2]);
 		glm::mat4 modelMatrixPersonajeBody = glm::mat4(modelMatrixPersonaje);
 		modelMatrixPersonajeBody = glm::translate(modelMatrixPersonajeBody, glm::vec3(0.0f, 0.6f, 0.0f));
 		modelMatrixPersonajeBody = glm::scale(modelMatrixPersonajeBody, glm::vec3(0.005, 0.005, 0.005));
