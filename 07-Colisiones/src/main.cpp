@@ -93,6 +93,9 @@ Model modelLampPost2;
 // Model animate instance
 // Mayow
 Model mayowModelAnimate;
+//Diablo
+Model diabloModelAnimate;
+
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 8, "../Textures/heightmap.png");
 
@@ -126,6 +129,8 @@ glm::mat4 modelMatrixLambo = glm::mat4(1.0);
 glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
+glm::mat4 modelMatrixDiablo = glm::mat4(1.0f);
+
 
 int animationIndex = 1;
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
@@ -327,6 +332,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
 
+	//Diablo
+	diabloModelAnimate.loadModel("../models/Diablo/Character_22_2.fbx");
+	diabloModelAnimate.setShader(&shaderMulLighting);
+	
+	//Ajuste de camara
 	camera->setPosition(glm::vec3(0.0, 0.0, 10.0));
 	camera->setDistanceFromTarget(distanceFromTarget);
 	camera->setSensitivity(1.0);
@@ -728,6 +738,7 @@ void destroy() {
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
+	diabloModelAnimate.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -812,24 +823,6 @@ bool processInput(bool continueApplication) {
 		std::cout << "Axes[4] ->" << axes[4] << std::endl; //LT
 		std::cout << "Axes[5] ->" << axes[5] << std::endl; //RT
 
-		if (fabs(axes[3] > 0.2f)) {
-			modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0f, 0.0f, axes[3] *0.2f));
-			animationIndex = 0;
-		}
-		if (fabs(axes[2]) > 0.2f) { //Se multiplica por 0.5 para ajustar el valor
-			modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-axes[2] *0.5f), glm::vec3(0.0f, 1.0f, 0.0f));;
-			animationIndex = 0;
-		}
-
-		if (fabs(axes[2] > 0.2f)) {
-			camera->mouseMoveCamera(axes[2] * 0.5f, 0, deltaTime);
-		}
-
-		if (fabs(axes[3] > 0.2f)) {
-			camera->mouseMoveCamera(0, axes[3] * 0.5f, deltaTime);
-		}
-
-
 		const unsigned char* botones = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &numeroBotones);
 		std::cout << "Numero de botones: " << numeroBotones << std::endl;
 		if (botones[0] == GLFW_PRESS)
@@ -861,11 +854,44 @@ bool processInput(bool continueApplication) {
 		if (botones[13] == GLFW_PRESS)
 			std::cout << "Se presiona el boton 13 :=" << std::endl; //<-
 
-
-		if (!isJump && botones[0] == GLFW_PRESS) {
-			isJump = true;
-			startTimeJump = currTime;
-			tmv = 0;
+		if (modelSelected == 2)
+		{
+			if (fabs(axes[1]) > 0.2f) {
+				modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0.0f, 0.0f, axes[1] * 0.05f));
+				animationIndex = 0;
+			}
+			if (fabs(axes[0]) > 0.2f) { //Se multiplica por 0.5 para ajustar el valor
+				modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-axes[0] * 0.5f), glm::vec3(0.0f, 1.0f, 0.0f));;
+				animationIndex = 0;
+			}
+			if (fabs(axes[2]) > 0.2f) {
+				camera->mouseMoveCamera(axes[2] * 0.5f, 0, deltaTime);
+			}
+			if (fabs(axes[3]) > 0.2f) {
+				camera->mouseMoveCamera(0, axes[3] * 0.5f, deltaTime);
+			}
+			if (!isJump && botones[0] == GLFW_PRESS) {
+				isJump = true;
+				startTimeJump = currTime;
+				tmv = 0;
+			}
+		}
+		if (modelSelected == 3)
+		{
+			if (fabs(axes[1]) > 0.2f) {
+				modelMatrixDiablo = glm::translate(modelMatrixDiablo, glm::vec3(0.0f, 0.0f, axes[1] * 0.05f));
+				animationIndex = 1;
+			}
+			if (fabs(axes[0]) > 0.2f) { //Se multiplica por 0.5 para ajustar el valor
+				modelMatrixDiablo = glm::rotate(modelMatrixDiablo, glm::radians(-axes[0] * 0.5f), glm::vec3(0.0f, 1.0f, 0.0f));;
+				animationIndex = 1;
+			}
+			if (fabs(axes[2]) > 0.2f) {
+				camera->mouseMoveCamera(axes[2] * 0.5f, 0, deltaTime);
+			}
+			if (fabs(axes[3]) > 0.2f) {
+				camera->mouseMoveCamera(0, axes[3] * 0.5f, deltaTime);
+			}
 		}
 	}
 
@@ -880,7 +906,7 @@ bool processInput(bool continueApplication) {
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
 		enableCountSelected = false;
 		modelSelected++;
-		if(modelSelected > 2)
+		if(modelSelected > 3)
 			modelSelected = 0;
 		if(modelSelected == 1)
 			fileName = "../animaciones/animation_dart_joints.txt";
@@ -1011,6 +1037,9 @@ void applicationLoop() {
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+	modelMatrixDiablo = glm::translate(modelMatrixDiablo, glm::vec3(16.0f, 0.05f, -5.0f));
+	modelMatrixDiablo = glm::rotate(modelMatrixDiablo, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -1343,6 +1372,23 @@ void applicationLoop() {
 		mayowModelAnimate.render(modelMatrixMayowBody);
 
 		/*******************************************
+		 * Diablo
+		 *******************************************/
+
+		modelMatrixDiablo[3][1] = -tmv * tmv * GRAVITY + 3.0 * tmv +
+			terrain.getHeightTerrain(modelMatrixDiablo[3][0], modelMatrixDiablo[3][2]);
+		tmv = currTime - startTimeJump;
+		if (modelMatrixDiablo[3][1] < terrain.getHeightTerrain(modelMatrixDiablo[3][0], modelMatrixDiablo[3][2])) { //Si ya cayó por debajo del terreno
+			isJump = false;
+			modelMatrixDiablo[3][1] = terrain.getHeightTerrain(modelMatrixDiablo[3][0], modelMatrixDiablo[3][2]);
+		}
+
+		glm::mat4 modelMatrixDiabloBody = glm::mat4(modelMatrixDiablo);
+		modelMatrixDiabloBody = glm::scale(modelMatrixDiabloBody, glm::vec3(0.0021, 0.0021, 0.0021));
+		diabloModelAnimate.setAnimationIndex(animationIndex);
+		diabloModelAnimate.render(modelMatrixDiabloBody);
+
+		/*******************************************
 		 * Skybox
 		 *******************************************/
 		GLint oldCullFaceMode;
@@ -1388,6 +1434,38 @@ void applicationLoop() {
 		aircraftCollider.c = glm::vec3(modelMatrixColliderAircraft[3]);
 		aircraftCollider.e = modelAircraft.getObb().e * glm::vec3(1.0, 1.0, 1.0);
 		addOrUpdateColliders(collidersOBB, "aircraft", aircraftCollider, modelMatrixAircraft);
+		
+		//Collider de la roca
+		glm::mat4 modelMatrixColliderRock = glm::mat4( matrixModelRock);
+		AbstractModel::SBB  rockCollider;
+		modelMatrixColliderRock = glm::scale(modelMatrixColliderRock, glm::vec3(1.0f, 1.0f, 1.0f));
+		modelMatrixColliderRock = glm::translate(modelMatrixColliderRock, modelRock.getSbb().c);
+		rockCollider.c = glm::vec3(modelMatrixColliderRock[3]);
+		rockCollider.ratio = modelRock.getSbb().ratio*1.0f;//Se multiplica por el escalamiento aplicado
+		addOrUpdateColliders(collidersSBB,"rock", rockCollider, matrixModelRock );
+
+		//Collider del lambo
+		AbstractModel::OBB lamboCollider;
+		glm::mat4 modelMatrixColliderLambo = glm::mat4(modelMatrixLambo);
+		modelMatrixColliderLambo[3][1] = terrain.getHeightTerrain(modelMatrixColliderLambo[3][0], modelMatrixColliderLambo[3][2]);
+		lamboCollider.u = glm::quat_cast(modelMatrixColliderLambo);
+		modelMatrixColliderLambo = glm::scale(modelMatrixColliderLambo, glm::vec3(1.3f, 1.3f, 1.3f));
+		modelMatrixColliderLambo = glm::translate(modelMatrixColliderLambo, modelLambo.getObb().c);
+		lamboCollider.c = glm::vec3(modelMatrixColliderLambo[3]);
+		lamboCollider.e = modelLambo.getObb().e * 1.3f;
+		addOrUpdateColliders(collidersOBB, "lambo", lamboCollider, modelMatrixLambo);
+
+		//Collider mayow
+		AbstractModel::OBB mayowCollider;
+		glm::mat4 modelMatrixColliderMayow = glm::mat4(modelMatrixMayow);
+		modelMatrixColliderMayow = glm::rotate(modelMatrixColliderMayow, glm::radians(-90.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f));
+		mayowCollider.u = glm::quat_cast(modelMatrixColliderMayow);
+		modelMatrixColliderMayow = glm::scale(modelMatrixColliderMayow, glm::vec3(0.021f, 0.021f, 0.021f));
+		modelMatrixColliderMayow = glm::translate(modelMatrixColliderMayow, mayowModelAnimate.getObb().c);
+		mayowCollider.c = glm::vec3(modelMatrixColliderMayow[3]);
+		mayowCollider.e = mayowModelAnimate.getObb().e * 0.021f * 0.75f;
+		addOrUpdateColliders(collidersOBB, "mayow", mayowCollider, modelMatrixMayow);
 
 		// Lamps1 colliders
 		for (int i = 0; i < lamp1Position.size(); i++){
@@ -1428,6 +1506,7 @@ void applicationLoop() {
 			sphereCollider.enableWireMode();
 			sphereCollider.render(matrixCollider);
 		}
+
 
 		// Esto es para ilustrar la transformacion inversa de los coliders
 		/*glm::vec3 cinv = glm::inverse(mayowCollider.u) * glm::vec4(rockCollider.c, 1.0);
