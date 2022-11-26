@@ -248,7 +248,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST); //Se activa la profundidad
 	glEnable(GL_CULL_FACE);
 
 	// Inicialización de los shaders
@@ -828,7 +828,8 @@ bool processInput(bool continueApplication) {
 		std::cout << "Axes[4] ->" << axes[4] << std::endl; //LT
 		std::cout << "Axes[5] ->" << axes[5] << std::endl; //RT
 
-		if (fabs(axes[2]) > 0.2f) { //Se multiplica por 0.5 para ajustar el valor
+		const unsigned char* botones = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &numeroBotones);
+		std::cout << "NUmero de botones:_" << numeroBotones << std::endl;
 		std::cout << "Numero de botones: " << numeroBotones << std::endl;
 		if (botones[0] == GLFW_PRESS)
 			std::cout << "Se presiona el boton 0 :=" << std::endl; //A
@@ -852,6 +853,12 @@ bool processInput(bool continueApplication) {
 			std::cout << "Se presiona el boton 9 :=" << std::endl; //R
 		if (botones[10] == GLFW_PRESS)
 			std::cout << "Se presiona el boton 10 :=" << std::endl; //arriba
+		if (botones[11] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 11 :=" << std::endl; //->
+		if (botones[12] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 12 :=" << std::endl; //abajo
+		if (botones[13] == GLFW_PRESS)
+			std::cout << "Se presiona el boton 13 :=" << std::endl; //<-
 		if (botones[11] == GLFW_PRESS)
 			std::cout << "Se presiona el boton 11 :=" << std::endl; //->
 		if (botones[12] == GLFW_PRESS)
@@ -899,20 +906,14 @@ bool processInput(bool continueApplication) {
 			}
 		}
 	}
-		if (botones[11] == GLFW_PRESS)
-			std::cout << "Se presiona el boton 11 :=" << std::endl; //->
-		if (botones[12] == GLFW_PRESS)
-			std::cout << "Se presiona el boton 12 :=" << std::endl; //abajo
-		if (botones[13] == GLFW_PRESS)
-			std::cout << "Se presiona el boton 13 :=" << std::endl; //<-
+		
 
 
-		if (!isJump && botones[0] == GLFW_PRESS) {
-			isJump = true;
-			startTimeJump = currTime;
-			tmv = 0;
-		}
-	}
+		//if (!isJump && botones[0] == GLFW_PRESS) {
+		//	isJump = true;
+		//	startTimeJump = currTime;
+		//	tmv = 0;
+		//} 
 
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		camera->mouseMoveCamera(offsetX, 0.0, deltaTime);
@@ -1404,8 +1405,6 @@ void applicationLoop() {
 		modelMatrixRay = glm::scale(modelMatrixRay, glm::vec3(0.1, 10.0, 0.2));
 		rayModel.render(modelMatrixRay);
 
-
-		 *******************************************/
 		//modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 		modelMatrixMayow[3][1] = -tmv * tmv * GRAVITY + 3.0 * tmv + 
 			terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
@@ -1533,8 +1532,15 @@ void applicationLoop() {
 			collidersSBB.begin(); it != collidersSBB.end(); it++) {
 			float t = 0;
 			if(raySphereIntersect(origenRayo, targetRayo, rayDirection, std::get<0>(it->second), t))
-				std::cout << "Hay colision el rayo con: " << it->first <<std::endl;
+				std::cout << " 1 Hay colision el rayo con: " << it->first <<std::endl;
 
+		}
+
+		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4>>::iterator it =
+			collidersOBB.begin(); it != collidersOBB.end(); it++) {
+			float t = 0;
+			if (rayOBBIntersect(origenRayo, targetRayo, std::get<0>(it->second)))
+				std::cout << "2 Hay rayo colision con: " << it->first << std::endl;
 		}
 
 		for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4>>::iterator it =
@@ -1543,7 +1549,7 @@ void applicationLoop() {
 			for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4>>::iterator jt =
 				jt = collidersSBB.begin(); jt != collidersSBB.end() && !isCollision; jt++) {
 				if (it != jt && testSphereSphereIntersection(std::get<0>(it->second), std::get<0>(jt->second))) {
-					std::cout << "Existe colision entre " << it->first << " y " << jt->first << std::endl;
+					std::cout << " 3 Existe colision entre " << it->first << " y " << jt->first << std::endl;
 					isCollision = true;
 				}
 			
@@ -1556,7 +1562,7 @@ void applicationLoop() {
 			for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4>>::iterator jt =
 				jt = collidersOBB.begin(); jt != collidersOBB.end() && !isCollision; jt++) {
 				if (it != jt && testOBBOBB(std::get<0>(it->second), std::get<0>(jt->second))) {
-					std::cout << "Existe colision entre " << it->first << " y " << jt->first << std::endl;
+					std::cout << " 4 Existe colision entre " << it->first << " y " << jt->first << std::endl;
 					isCollision = true;
 				}
 
